@@ -1,0 +1,41 @@
+
+html, body, #map {
+    height: 100%;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+}
+
+p, h1, h2, h3 { 
+	padding-right: 30px;  
+	padding-left: 30px; 
+  font-family: Arial, Helvetica;
+}
+
+.algolia-autocomplete {
+  width: 250px;
+  font-size:12px;
+}
+.algolia-autocomplete .aa-input, .algolia-autocomplete .aa-hint {
+  width: 100%;
+}
+.algolia-autocomplete .aa-hint {
+  color: #999;
+}
+.algolia-autocomplete .aa-dropdown-menu {
+  width: 100%;
+  background-color: #fff;
+  border: 1px solid #999;
+  border-top: none;
+}
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion {
+  cursor: pointer;
+  padding: 1px 4px;
+}
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion.aa-cursor {
+  background-color: #B2D7FF;
+}
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion em {
+  font-weight: bold;
+  font-style: normal;
+}
