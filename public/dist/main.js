@@ -1358,6 +1358,15 @@ if (miljø) {
   host= host.replace('dawa',miljø); 
 } 
 
+var kommuner= new Map();
+fetch(host + 'kommuner').then( function(response) {
+  response.json().then( function ( data ) {
+    for (var i= 0; i < data.length; i++) {
+      kommuner.set(data[i].kode, data[i].navn)
+    };
+  });
+});
+
 function getQueryVariable(variable) {
   var query = window.location.search.substring(1);
   var vars = query.split("&");
@@ -1369,38 +1378,49 @@ function getQueryVariable(variable) {
   }
 }
 
-function visnavngivenvej(map, stednavn) {
-  fetch(host+"steder/"+stednavn.sted.id + '?format=geojson').then( function(response) {
-    response.json().then( function ( data ) {
+function visnavngivenvej(map, valgt) {
+  fetch(valgt.vejstykke.href).then( function(response) {
+    response.json().then( function ( vejstykke ) {
+      fetch(vejstykke.navngivenvej.href).then( function(response) {
+        response.json().then( function ( navngivenvej ) {
 
-      if (data.geometri || data.features && data.features.length === 0) {
-            alert('Søgning gav intet resultat');
-            return;
-          }
-      var geojsonlayer= L.geoJSON(data);
-      geojsonlayer.addTo(map);
+          fetch(navngivenvej.href+'?format=geojson&geometri='+navngivenvej.beliggenhed.geometritype).then( function(response) {
+            response.json().then( function ( data ) {
+              if (data.geometri || data.features && data.features.length === 0) {
+                    alert('Søgning gav intet resultat');
+                    return;
+                  }
+              var geojsonlayer= L.geoJSON(data);
+              geojsonlayer.addTo(map);
 
-      map.fitBounds(geojsonlayer.getBounds());
+              map.fitBounds(geojsonlayer.getBounds());
 
-      var x= stednavn.sted.visueltcenter[1]
-        , y= stednavn.sted.visueltcenter[0];
-      var popup = L.popup()
-        .setLatLng([x, y])
-        .setContent("<a target='_blank' href='" + host + "steder/"+stednavn.sted.id+"'>" + stednavn.navn + '<br/>' + stednavn.sted.hovedtype + ', ' + stednavn.sted.undertype + "</a>")
-        .openOn(map);
-      geojsonlayer.bindPopup(popup);
-      // var x= adgangsadresse.adgangspunkt.koordinater[1]
-      //   , y= adgangsadresse.adgangspunkt.koordinater[0];
-      // var marker= L.circleMarker(L.latLng(x, y), {color: 'red', fillColor: 'red', stroke: true, fillOpacity: 1.0, radius: 4, weight: 2, opacity: 1.0}).addTo(map);//defaultpointstyle);
-      // var popup= marker.bindPopup(L.popup().setContent("<a target='_blank' href='https://dawa.aws.dk/adgangsadresser?id="+adgangsadresse.id+"'>" + dawautil.formatAdgangsadresse(adgangsadresse) + "</a>"),{autoPan: true});
-      // if (adgangsadresse.vejpunkt) {
-      //   var vx= adgangsadresse.vejpunkt.koordinater[1]
-      //     , vy= adgangsadresse.vejpunkt.koordinater[0];
-      //   var vpmarker= L.circleMarker(L.latLng(vx, vy), {color: 'blue', fillColor: 'blue', stroke: true, fillOpacity: 1.0, radius: 4, weight: 2, opacity: 1.0}).addTo(map);//defaultpointstyle);
-      //   vpmarker.bindPopup(L.popup().setContent("<a target='_blank' href='https://dawa.aws.dk/adgangsadresser?id="+adgangsadresse.id+"'>" + dawautil.formatAdgangsadresse(adgangsadresse) + "</a>"),{autoPan: true});
-      // }
-      // map.setView(L.latLng(x, y),12);
-      //popup.openPopup();
+              var popup = L.popup()
+                .setContent("<a target='_blank' href='" + vejstykke.navngivenvej.href + "'>" + vejstykke.navn  + "</a>");
+              geojsonlayer.bindPopup(popup);
+              if (navngivenvej.beliggenhed.vejtilslutningspunkter) {
+                let punkter= navngivenvej.beliggenhed.vejtilslutningspunkter.coordinates;
+                for (var i= 0; i<punkter.length;i++) {
+                   var marker= L.circleMarker(L.latLng(punkter[i][1], punkter[i][0]), {color: 'blue', fillColor: 'blue', stroke: true, fillOpacity: 1.0, radius: 4, weight: 2, opacity: 1.0}).addTo(map);
+                }
+              }
+             
+              // var x= adgangsadresse.adgangspunkt.koordinater[1]
+              //   , y= adgangsadresse.adgangspunkt.koordinater[0];
+              // var marker= L.circleMarker(L.latLng(x, y), {color: 'red', fillColor: 'red', stroke: true, fillOpacity: 1.0, radius: 4, weight: 2, opacity: 1.0}).addTo(map);//defaultpointstyle);
+              // var popup= marker.bindPopup(L.popup().setContent("<a target='_blank' href='https://dawa.aws.dk/adgangsadresser?id="+adgangsadresse.id+"'>" + dawautil.formatAdgangsadresse(adgangsadresse) + "</a>"),{autoPan: true});
+              // if (adgangsadresse.vejpunkt) {
+              //   var vx= adgangsadresse.vejpunkt.koordinater[1]
+              //     , vy= adgangsadresse.vejpunkt.koordinater[0];
+              //   var vpmarker= L.circleMarker(L.latLng(vx, vy), {color: 'blue', fillColor: 'blue', stroke: true, fillOpacity: 1.0, radius: 4, weight: 2, opacity: 1.0}).addTo(map);//defaultpointstyle);
+              //   vpmarker.bindPopup(L.popup().setContent("<a target='_blank' href='https://dawa.aws.dk/adgangsadresser?id="+adgangsadresse.id+"'>" + dawautil.formatAdgangsadresse(adgangsadresse) + "</a>"),{autoPan: true});
+              // }
+              // map.setView(L.latLng(x, y),12);
+              //popup.openPopup();
+            });
+          });
+        });
+      }); 
     });
   });
 }
@@ -1422,8 +1442,8 @@ function search(query, callback) {
       return response.json();
     }
   }) 
-  .then( function ( stednavne ) { 
-    callback(stednavne);
+  .then( function ( veje ) { 
+    callback(veje);
   });
 }
 
@@ -1449,10 +1469,10 @@ L.Control.Search = L.Control.extend({
     autocomplete(this.input, { debug: true, hint: false, templates: { empty: 'empty' }, autoselect: true }, [
         {
           source: search,
-          displayKey: 'navn',
+          displayKey: 'tekst',
           templates: {
             suggestion: function(suggestion) {
-              return '<div>' + suggestion.tekst + " (" + suggestion.vejstykke.kommunekode + ')' + '</div>';
+              return '<div>' + suggestion.tekst + " (" + suggestion.vejstykke.kommunekode + ' ' + kommuner.get(suggestion.vejstykke.kommunekode) + ')' + '</div>';
             }
           }
         }
