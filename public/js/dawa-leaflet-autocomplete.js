@@ -47,7 +47,7 @@ function visnavngivenvej(map, valgt) {
               map.fitBounds(geojsonlayer.getBounds());
 
               var popup = L.popup()
-                .setContent("<a target='_blank' href='" + vejstykke.navngivenvej.href + "'>" + vejstykke.navn  + "</a>");
+                .setContent("<a href='" + vejstykke.navngivenvej.href.replace('dawa', 'info') + "'>" + vejstykke.navn  + "</a>");
               geojsonlayer.bindPopup(popup);
               if (navngivenvej.beliggenhed.vejtilslutningspunkter) {
                 let punkter= navngivenvej.beliggenhed.vejtilslutningspunkter.coordinates;
